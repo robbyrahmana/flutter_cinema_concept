@@ -1,6 +1,8 @@
 import 'package:cinema_concept/models/movie.dart';
+import 'package:cinema_concept/pages/movie_detail_page.dart';
 import 'package:cinema_concept/widgets/blur_background.dart';
 import 'package:cinema_concept/widgets/custom_app_bar.dart';
+import 'package:cinema_concept/widgets/custom_hero.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_indicator/flutter_slider_indicator.dart';
 
@@ -47,18 +49,28 @@ class _SessionPageState extends State<SessionPage> {
   }
 
   Widget _movieList() {
-    return Stack(
-      children: <Widget>[
-        _movieStack(),
-        _pageIndicator(),
-        PageView.builder(
-          controller: _pageController,
-          itemCount: _movieData.length,
-          itemBuilder: (context, index) {
-            return Container();
-          },
-        )
-      ],
+    return GestureDetector(
+      onVerticalDragStart: (details) {
+        if ((details.globalPosition.dx > (_width / 2 - 50) &&
+                details.globalPosition.dx < (_width / 2 + 50)) &&
+            details.globalPosition.dy > (_width / 2 + 100)) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => MovieDetailPage(movie: _displayMovie)));
+        }
+      },
+      child: Stack(
+        children: <Widget>[
+          _movieStack(),
+          _pageIndicator(),
+          PageView.builder(
+            controller: _pageController,
+            itemCount: _movieData.length,
+            itemBuilder: (context, index) {
+              return Container();
+            },
+          )
+        ],
+      ),
     );
   }
 
@@ -83,23 +95,22 @@ class _SessionPageState extends State<SessionPage> {
   Widget _movieCard(Movie displayMovie, double width, double height) {
     return Align(
       alignment: Alignment.topCenter,
-      child: Container(
-        width: width * .8,
-        height: height * .75,
-        decoration: BoxDecoration(boxShadow: [
-          BoxShadow(color: Colors.black38, spreadRadius: 1, blurRadius: 2)
-        ], borderRadius: BorderRadius.all(Radius.circular(12))),
-        child: Stack(
-          children: <Widget>[
-            Container(
-              height: height * .75,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                  color: Colors.white),
-            ),
-            Column(
-              children: <Widget>[
-                Container(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        child: Container(
+          width: width * .8,
+          height: height * .75,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(color: Colors.black38, spreadRadius: 1, blurRadius: 2)
+              ],
+              borderRadius: BorderRadius.all(Radius.circular(12))),
+          child: Column(
+            children: <Widget>[
+              CustomHero(
+                tag: displayMovie.image,
+                child: Container(
                   height: height * .3,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -107,7 +118,13 @@ class _SessionPageState extends State<SessionPage> {
                           image: ExactAssetImage(displayMovie.image),
                           fit: BoxFit.cover)),
                 ),
-                Container(
+              ),
+              CustomHero(
+                tag: displayMovie.image + 'content',
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      color: Colors.white),
                   height: height * .45,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -173,10 +190,10 @@ class _SessionPageState extends State<SessionPage> {
                       ],
                     ),
                   ),
-                )
-              ],
-            )
-          ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -190,7 +207,7 @@ class _SessionPageState extends State<SessionPage> {
           child: SliderIndicator(
             length: _movieData.length,
             activeIndex: currentPage.round(),
-            displayIndicatorSize: 12,
+            displayIndicatorSize: 6,
             displayIndicatorColor: Colors.black38,
           ),
         ));
